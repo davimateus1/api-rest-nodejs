@@ -4,7 +4,7 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "dev": "tsx watch src/server.ts"
   },
   "repository": {
     "type": "git",
@@ -18,6 +18,11 @@
   },
   "homepage": "https://github.com/davimateus1/api-rest-nodejs#readme",
   "devDependencies": {
+    "@types/node": "^20.3.2",
+    "tsx": "^3.12.7",
     "typescript": "^5.1.6"
+  },
+  "dependencies": {
+    "fastify": "^4.18.0"
   }
 }
