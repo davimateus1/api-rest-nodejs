@@ -78,4 +78,4 @@ web_modules/
 .env.local
 
 # tmp files
-tmp/app.db
+db/app.db
