@@ -3,6 +3,8 @@ import { z } from 'zod'
 import { randomUUID } from 'node:crypto'
 import { knex } from '../database'
 
+const SEVEN_DAYS = 1000 * 60 * 60 * 24 * 7
+
 export async function transactionsRoutes(server: FastifyInstance) {
   server.get('/', async () => {
     const transactions = await knex('transactions').select()
@@ -41,10 +43,21 @@ export async function transactionsRoutes(server: FastifyInstance) {
       request.body,
     )
 
+    let sessionId = request.cookies.sessionId
+
+    if (!sessionId) {
+      sessionId = randomUUID()
+      reply.cookie('sessionId', sessionId, {
+        path: '/',
+        maxAge: SEVEN_DAYS,
+      })
+    }
+
     await knex('transactions').insert({
       id: randomUUID(),
       title,
       amount: type === 'credit' ? amount : -amount,
+      session_id: sessionId,
     })
 
     return reply.status(201).send()
