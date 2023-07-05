@@ -6,8 +6,8 @@ import { checkSessionIdExists } from '../middlewares/check-session-id-exists'
 
 const SEVEN_DAYS = 1000 * 60 * 60 * 24 * 7
 
-export async function transactionsRoutes(server: FastifyInstance) {
-  server.get('/', { preHandler: [checkSessionIdExists] }, async (request) => {
+export async function transactionsRoutes(app: FastifyInstance) {
+  app.get('/', { preHandler: [checkSessionIdExists] }, async (request) => {
     const { sessionId } = request.cookies
 
     const transactions = await knex('transactions')
@@ -17,30 +17,26 @@ export async function transactionsRoutes(server: FastifyInstance) {
     return { transactions }
   })
 
-  server.get(
-    '/:id',
-    { preHandler: [checkSessionIdExists] },
-    async (request) => {
-      const { sessionId } = request.cookies
+  app.get('/:id', { preHandler: [checkSessionIdExists] }, async (request) => {
+    const { sessionId } = request.cookies
 
-      const createTransactionParamsSchema = z.object({
-        id: z.string().uuid(),
+    const createTransactionParamsSchema = z.object({
+      id: z.string().uuid(),
+    })
+
+    const { id } = createTransactionParamsSchema.parse(request.params)
+
+    const transaction = await knex('transactions')
+      .where({
+        id,
+        session_id: sessionId,
       })
+      .first()
 
-      const { id } = createTransactionParamsSchema.parse(request.params)
+    return { transaction }
+  })
 
-      const transaction = await knex('transactions')
-        .where({
-          id,
-          session_id: sessionId,
-        })
-        .first()
-
-      return { transaction }
-    },
-  )
-
-  server.get(
+  app.get(
     '/summary',
     { preHandler: [checkSessionIdExists] },
     async (request) => {
@@ -54,7 +50,7 @@ export async function transactionsRoutes(server: FastifyInstance) {
     },
   )
 
-  server.post('/', async (request, reply) => {
+  app.post('/', async (request, reply) => {
     const createTransactionBodySchema = z.object({
       title: z.string(),
       amount: z.number(),
